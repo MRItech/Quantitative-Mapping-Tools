@@ -1,0 +1,4 @@
+ver:1.0.2
+Changes:
+-  Minor bugs fixed.
+- Added linear field correction for R2* estimation.
