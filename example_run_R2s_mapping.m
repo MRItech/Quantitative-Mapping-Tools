@@ -1,8 +1,8 @@
 %% R2* processing pipeline
 % Univ. of Alberta, 2024
 % Author: N Naji, nashwana@ualberta.ca
-% if used, please cite: Naji N, Snyder J, Seres P, Beaulieu C, Wilman A. 
-% Repeatability of susceptibility separation methods in brain at 3 T. In Proceedings of the 32nd Annual Meeting of ISMRM, Singapore, Singapore 2024 (p. 2620).
+% if used, please cite: Naji N, Seres P, Moran G, Beaulieu C, Wilman AH.  
+% Repeatability of Susceptibility Source Separation Methods in Human Brain: A Single‐Site Study at 3 T. NMR in Biomedicine. 2026;39(2):e70225..
 
 % commented settings are optional
 
@@ -51,7 +51,7 @@ if opt.R2sMapping.Recon
         disp(['R2* mapping ...'])
         opt.R2sMapping.useGPU = opt.useGPU;
         if opt.R2sMapping.use_mask, R2smask = mask; else,  R2smask =[]; end
-        [Results.R2s, ~, ~] = f_R2s_mapping(Raw, opt.R2sMapping,R2smask);
+        [Results.R2s, Results.S0, ~] = f_R2s_mapping(Raw, opt.R2sMapping,R2smask);
 
         % save Results.R2s
      end
