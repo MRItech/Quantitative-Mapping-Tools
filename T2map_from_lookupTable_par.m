@@ -38,51 +38,85 @@ function [T2map,B1map ]= T2map_from_lookupTable_par( lookupTable, imgVolume, T2_
 
             mask(isnan(imgVolume(:,:,:,1))) =0;
             mask(isinf(imgVolume(:,:,:,1))) =0;
-            
+           
             % find remaining
             idx = find(mask);
             [jj,kk,ll] = ind2sub(N(1:3),idx);
             lnth = length(jj);
-
-            % arrange image and table 
-            imgVolume = permute(imgVolume, [4, 1, 2, 3]);
-            lookupTable = permute(lookupTable, [3, 1, 2]); % T2 already in first dim
-            N_table = size(lookupTable);
             
-            if ~givenB1
-                lookupTable = reshape(lookupTable, N_table(1), []);
-            end
-
-            p = gcp('nocreate');
+             p = gcp('nocreate');
             if isempty(p)
                 p =parpool('Threads');
             end
-            % loop
-              parfor lk = 1:lnth
+
+            % arrange image and table for multiple echoes
+            if length(N)>3 & N(4)>1
+                imgVolume = permute(imgVolume, [4, 1, 2, 3]);
+                lookupTable = permute(lookupTable, [3, 1, 2]); % T2 already in first pos
+                
+                N_table = size(lookupTable);
+            
+                if ~givenB1
+                    lookupTable = reshape(lookupTable, N_table(1), []);
+                end
+
+           
+            
+             if givenB1 % multi-echo with B1
+                    % loop
+                    parfor lk = 1:lnth
                     j = jj(lk); k = kk(lk); l = ll(lk);
-                    
-                    
-                   if givenB1
+
                         % find B1 indx
                         b1ind = find(abs(b1Range - B1map(j,k,l))==min(abs(b1Range - B1map(j,k,l))));
                         b1ind = b1ind(1);
                         dv = sum(abs(imgVolume(:,j,k,l) - lookupTable(:,:,b1ind)).^2);
-                   else
-                         dv = sum(abs(imgVolume(:,j,k,l) - lookupTable).^2);
-                   end
+                   
     
                     dv(isnan(dv)) = inf;
                     t2ind_ = find(dv==min(dv));
     
-                    if givenB1
+                   
                         T2map_(lk) = T2_range(t2ind_(1));
-                    else
+                   
+                    end
+
+             else  % multi-echo without B1 
+                    parfor lk = 1:lnth
+                    j = jj(lk); k = kk(lk); l = ll(lk);
+                    
+                    dv = sum(abs(imgVolume(:,j,k,l) - lookupTable).^2);
+                  
+    
+                    dv(isnan(dv)) = inf;
+                    t2ind_ = find(dv==min(dv));
+    
+                   
                         
                         [t2ind, b1ind] = ind2sub(N_table(2:3),t2ind_);
                         T2map_(lk) = T2_range(t2ind(1));
                         B1map_(lk) = b1Range(b1ind(1));
-                    end
+                   
               end
+             end
+
+            else % PD-T2
+
+                 % loop
+              parfor lk = 1:lnth
+                j = jj(lk); k = kk(lk); l = ll(lk);
+                % find B1 indx
+                b1ind = find(abs(b1Range - B1map(j,k,l))==min(abs(b1Range - B1map(j,k,l))));
+                b1ind = b1ind(1);
+
+                dv = abs(imgVolume(j,k,l)-lookupTable(:,b1ind));
+                dv(isnan(dv)) = inf;
+                t2ind = find(dv==min(dv));
+                T2map_(lk) = T2_range(t2ind(1));
+
+              end
+                
+            end  
              
         T2map(idx) =T2map_;
         if ~givenB1
