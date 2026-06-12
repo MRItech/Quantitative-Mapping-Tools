@@ -36,6 +36,8 @@ echonum = 1:20; % or size(magnitude,4);  i.e., if using all echoes
 % if dual echo, set echonum to be the used echoes. e.g. echonum = [1 , 5]
 if ~is_dual_echo
     imgVolume = magnitude(:,:,:,echonum);   % echoes to be fitted
+else
+    imgVolume = magnitude;
 end
 
 % load B1
@@ -61,7 +63,7 @@ end
  t= tic;
  [T2map,B1map ]= T2map_from_lookupTable_par( lookupTable, imgVolume, T2_range, B1map, B1_range );
  
- toc
+ toc(t)
 
  T2map (isnan(T2map)) = 0; % remove nan
  T2map(isinf(T2map))=0; % remove inf
