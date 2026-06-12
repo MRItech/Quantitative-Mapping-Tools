@@ -3,6 +3,8 @@
 % Author: N Naji, nashwana@ualberta.ca
 clear
 
+is_dual_echo = false;
+
 %% load lookup table,
 
 
@@ -31,22 +33,29 @@ end
 
 % select echoes to be fitted
 echonum = 1:20; % or size(magnitude,4);  i.e., if using all echoes
-
-imgVolume = magnitude(:,:,:,echonum);   % echoes to be fitted
+% if dual echo, set echonum to be the used echoes. e.g. echonum = [1 , 5]
+if ~is_dual_echo
+    imgVolume = magnitude(:,:,:,echonum);   % echoes to be fitted
+end
 
 % load B1
 B1map = []; % if not available
 
 B1map = single(niftiread('inputFolder\B1_registered_to_MESE.nii.gz'));
 
-% make sure to normalize B1map
+% make sure to normalize B1map such that prescribed flip angle correspond to 1
 
 %% select relevant echoes from the table and normalize by 1st echo
 
-lookupTable =  (lookupTable_(:,:,echonum(1:end)) ./ lookupTable_(:,:,echonum(1)));
+lookupTable =  (lookupTable_(:,:,echonum(2:end)) ./ lookupTable_(:,:,echonum(1)));
 
 % normalize imgVolume by 1st echo
-imgVolume = (imgVolume(:,:,:,echonum(1:end)) ./ imgVolume(:,:,:,echonum(1)));
+if is_dual_echo
+    imgVolume = (imgVolume(:,:,:,2) ./ imgVolume(:,:,:,1));
+else
+    imgVolume = (imgVolume(:,:,:,echonum(2:end)) ./ imgVolume(:,:,:,echonum(1)));
+end
+
  %% run fitting
 
  t= tic;
