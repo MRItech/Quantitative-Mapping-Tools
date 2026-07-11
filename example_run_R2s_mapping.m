@@ -28,10 +28,10 @@ opt.R2sMapping.verbose = 1;                   % 0: silent, 1: basic, 2: detailed
 
 %% load magnitude, phase, TEs_sec, voxel_size_mm, SliceThickness_mm
 % Raw.mag = magnitude;
-% Raw.ph = phase;
-% Raw.vox = voxel_size_mm;
+% Raw.ph = phase;          % If DICOM, make sure to convert it into radian, [-pi pi] range
+% Raw.vox = voxel_size_mm; % e.g., [0.625 ,0.625 ,1]
 % Raw.TE = TEs_sec;
-% Raw.SliceThickness = SliceThickness_mm;
+% Raw.SliceThickness = SliceThickness_mm; % e.g. 1
 
 %% quick mask, if not available
 mx_proj = max(Raw.mag,[],4);
