@@ -12,18 +12,19 @@
 % b1Range: % range of B1 values simulated
 
 function [T2map,B1map ]= T2map_from_lookupTable_par( lookupTable, imgVolume, T2_range, B1map, b1Range )
+            N = size(imgVolume);
 
             % is B1 provided
             if isempty(B1map)
                 disp(' Fitting without B1')
                 givenB1 =0;
+                B1map = zeros(N(1:3));
             else
                  disp(' Fitting with B1 knowledge')
                  givenB1 =1;
             end
 
-            N = size(imgVolume);
-
+            
             T2map = zeros(N(1:3));
             % exclude out of bound voxels
             mask = ones(N(1:3));
